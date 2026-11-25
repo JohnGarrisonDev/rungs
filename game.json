@@ -1,0 +1,20 @@
+{
+  "slug": "rungs",
+  "title": "Rungs",
+  "tagline": "One letter per rung. Climb from one word to another.",
+  "description": "A word ladder with an odd little robot on it. Change one letter at a time, every step a real word, and climb from the bottom word to the top one in as few rungs as you can. Three fresh ladders every day with streaks, a 60-ladder Journey and endless practice.",
+  "genre": "Word puzzle",
+  "kinds": ["Word", "Puzzle"],
+  "daily": true,
+  "verb": "Climb",
+  "tone": "pink",
+  "players": "1 player",
+  "session": "2–10 min ladders",
+  "controls": ["Keyboard", "Mouse", "Touch"],
+  "version": "1.0.0",
+  "released": "2026-11-24",
+  "updated": "2026-11-24",
+  "repo": "https://github.com/JohnGarrisonDev/rungs",
+  "cover": "cover.webp",
+  "coverAlt": "Illustration: an odd little robot climbs a tall wonky ladder into the clouds, each rung a blank letter tile, with a bell waiting at the top."
+}

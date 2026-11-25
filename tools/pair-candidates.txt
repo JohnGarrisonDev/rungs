@@ -1,0 +1,61 @@
+# Themed ladder candidates: "start goal" per pair, comma separated, several per line. tools/build-pairs.mjs keeps
+# the ones that can be climbed through puzzle words in 2-9 steps and writes src/logic/pairs.js with their par.
+# Only ever APPEND new pairs at the end: dailies pick from the built list by index.
+cat dog, pig sty, wet dry, hot ice, boy man, egg hen, old new, one two, ape man, pen ink, tea cup, hen fox, bat owl, pan pot
+jam jar, cat nap, dog paw, run jog, rip sew, raw fry, day sun, dim lit, nap bed, cap hat, tug tow, bug fly, fox den, sob cry
+tip top, hop run, row oar, car van, cot bed, pup dog, pit top, ham egg, pea pod, wig hat, bow tie, fib lie, fat fit, pig hog
+rat cat, sad joy, cub den, fly web, sea bay, mud bog, fir oak, toe leg, sip tea, low top, win cup, eat pie, bud bee, sun sky
+big wee, key pin, den pit, hug pat, sit lie, ant bee, cow pig, elf imp, owl hen, oak elm, bus cab, mop wet, jog run, hat wig
+ice hot, fog sun, rod bar, wax wig, zip zap, fun joy, sly fox, shy coy, hem sew, dot dab, mix jam, bag box, pot pan, cry sob
+cold warm, lead gold, seed tree, work play, dusk dawn, head tail, love hate, poor rich, slow fast, hard soft, hard easy
+fish bird, moon star, east west, rain snow, lost home, boat ship, wolf lamb, lion bear, hand foot, shoe boot, sock shoe
+wild tame, rise fall, give take, pull push, open shut, live love, word game, wood fire, coal fire, coal mine, rock roll
+salt sand, wave surf, surf sand, lake pond, pond fish, hook fish, bait fish, worm bird, bird nest, nest tree, tree leaf
+leaf fall, feet shoe, wind gale, mist rain, rain hail, hail snow, sail boat, walk ride, ride bike, bike race, mind body
+body soul, good evil, sick well, four five, five nine, nine zero, blue pink, pink rose, rose bush, gold ring, ring bell
+bell toll, door gate, barn farm, corn crop, pony mule, cook meal, meal dish, dish bowl, rice bowl, bean soup, wolf pack
+deer fawn, calf bull, kite wind, wind sail, sail port, ship dock, city town, town road, road path, road trip, trip home
+land lord, lord king, king duke, page book, book word, poem song, song tune, tune note, note book, read book, mail post
+post card, card game, ball game, ball goal, kick goal, goal post, swim pool, dive deep, deep blue, blue moon, moon beam
+dark room, door knob, lock door, rope knot, mast sail, hill vale, peak vale, rock sand, sand dune, mice rats, frog toad
+toad newt, bees hive, wool coat, coat hood, cape town, head foot, hair comb, bath soap, neat mess, mess tidy, cool warm
+mild wild, calm wild, calm gale, loud soft, tiny huge, more less, lose find, hide seek, seek find, pure gold, iron gold
+coin cash, bank cash, camp fire, tent camp, hike trek, star moon, noon dusk, dawn noon, week year, yawn doze, doze wake
+rest work, toil rest, sing song, fear hope, wish hope, hawk dove, crow hawk, duck pond, duck swan, wolf howl, mole hole
+worm hole, hard cash, fast food, baby talk, back door, bare foot, bird bath, boat race, deep dish, down hill
+fire wall, fish tank, flat tire, foot ball, hair line, half time, hand made, head line, high tide, home town, life boat
+long shot, moon walk, rain coat, snow ball, sand bank, star dust, time zone, wild card, wish bone, wood pile
+warm cold, soft hard, fast slow, rich poor, play work, dawn dusk, tail head, west east, snow rain, tame wild
+fall rise, take give, push pull, shut open, hate love, gold lead, tree seed, foot hand, boot shoe, bear lion, lamb wolf
+milk cake, wash dish, pipe leak, bark tree, dirt road, corn meal, beef stew, fish cake
+bake loaf, bulb lamp, lamp glow, lamp dark, moth lamp, tall tale, fair game, word play, face mask, fool wise
+nose toes, palm fist, vest coat, silk wool, pine cone, pine tree, wind mill, mill corn, gate post, sign post
+pony cart, cart road, mine gold, cave bear, hike hill, sled snow, cold snap, heat wave, tidy room, soap dish
+desk work, bank note, coat tail, wasp nest, seed corn, lime tree, pear tree
+black white, wheat bread, flour bread, bread toast, sleep dream, smile frown, stone brick, grass green, river ocean
+mouse house, bride groom, brush paint, paint print, shore shell, beach shore, shark shore, track train, tired sleep
+snore sleep, flock sheep, stone steel, frost flame, smoke flame, spark flame, boots shoes, shoes socks, pants shirt
+slack tight, loose tight, right wrong, stand crawl, start stall, brave timid, weeks years, seeds trees, trees woods
+rainy sunny, windy sunny, baker cakes, hills dales, books words, cards games, boats ships, walks rides, loves hates
+hated loved, gives takes, heads tails, roses weeds, stars moons, rains winds, tides waves, learn teach, shout speak
+chill sweat, grove grape, stork crane, stick stone, brick block, brown black, trick treat, crust crumb, bread crumb
+stove steak, plate spoon, glass plate, plant grass, train plane, snack shark, watch clock, stare blink, sharp blunt
+large small, fresh stale, clean dirty, stair floor, shops store, broom witch, catch pitch, flame match, snack lunch
+drive brake, spill stain, board chalk, class grade, words spell, brain think, glare shine, shade shine, waves shore
+spear sword, chair stand, stool chair, plant stalk, silly smart, price trade, stock trade, field track, ships fleet
+stack crate, shack house, crowd cheer, clown crowd, clown frown, crisp frost, stove steam, steam cream, cream sweet
+grain bread, grass grain, shore storm, spade blade, slide swing, score sport, point score, shoot score, skate slide
+slope slide, trade share, sweet treat, storm cloud, cloud clear, heart brain, horse stall, horse mouse, night light
+light heavy, dream sleep, grape juice, honey money, bunny funny, puppy kitty, apple fruit, lemon melon
+table chair, couch chair, knife spoon, bread crust, toast roast, roast feast, feast beast, beast brute
+shark whale, whale water, water river, crane plane, plane place, place stage, climb crawl, crawl creep, creep sneak
+sneak steal, steal trade, storm steam, flood blood, blood heart, shirt skirt, short story, world globe, globe glove
+print press, press dress, dress shirt, sweat sweet, sugar spice, salty spicy, spice price, price prize, prize pride
+track truck, truck trunk, wordy noisy, quiet quick, quick slick, blame shame, shame share, share spare, think thank
+thank thing, bring thing, stare glare, glare blaze, blaze flame, flame frame, frame crate, crane crown, crown clown
+brown bread, green grass, greet great, great grate, grate grape, grape graze, graze grass, glass class, class clash
+clash crash, crash crush, crush brush, brush blush, blush flush, flush flash, flash slash, slash stash, stash stack
+stack stick, stick slick, slick slice, slice spice, spine shine, shone stone, stone store, store shore, shore chore
+chore choke, smoke spoke, spoke spike, spike spite, white write, write wrote, shout scout, scout snout, snore store
+sleep sheep, sheep steep, steep steel, steel wheel, wheel wheat, wheat cheat, cheat cheap, cheap sheep, tower power
+power lower, lower mower, liver river, river diver, diver water, water later
