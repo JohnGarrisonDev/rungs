@@ -134,6 +134,7 @@ export function createUI(root, actions) {
           <button class="btn" data-act="copy" data-f="r-copy" hidden>Copy result</button>
           <button class="btn" data-act="hide-result">Look at the ladder</button>
         </div>
+        <div class="r-talk" data-f="r-talk" hidden></div>
       </div>
     </div>
   </section>

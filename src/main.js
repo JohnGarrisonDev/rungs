@@ -1,6 +1,7 @@
 // Rungs: app state, screen flow, input, saving, frame loop and the ?debug hook.
 // Rules live in src/logic (pure, tested). ui.js builds the DOM, scene.js draws the canvas; neither holds game state.
 import { makeStore, wireChrome } from '../kit/kit.js'
+import { dailyTalk, tellUs } from '../kit/talk.js'
 import { createUI, starsHtml, esc } from './ui.js'
 import { createScene } from './scene.js'
 import { snd } from './audio.js'
@@ -314,6 +315,13 @@ function openResult(animated = true) {
   ui.text('r-next', nextLabel())
   ui.f['r-copy'].hidden = p.mode !== 'daily'
   ui.text('r-copy', 'Copy result')
+  // Anonymous "you beat N%" and difficulty vote: today's daily ladders only (never archive days, the Journey or Endless).
+  // A revealed ladder still gets the vote, but sends no score.
+  const talk = ui.f['r-talk']
+  if (p.mode === 'daily' && p.meta.date === app.today) {
+    const kind = DAILY_KINDS[p.meta.idx]
+    dailyTalk(talk, { game: 'rungs', key: p.meta.date, board: kind.id, score: s.revealed ? undefined : n, label: `${kind.name} ladder`, compact: true })
+  } else { talk.replaceChildren(); talk.hidden = true }
   ui.f.result.hidden = false
   ui.f.result.classList.toggle('pop', animated)
   if (animated && st) for (let k = 0; k < st; k++) setTimeout(() => snd.star(k), 250 + k * 170)
@@ -523,6 +531,7 @@ document.addEventListener('visibilitychange', () => { lastT = performance.now();
 
 // ---------------------------------------------------------------- boot
 wireChrome({ stage })
+tellUs(document.getElementById('tell-us'), { game: 'rungs', issueUrl: 'https://github.com/JohnGarrisonDev/rungs/issues/new?template=feedback.yml' })
 function boot() {
   const last = save.last
   app.today = dateKey()

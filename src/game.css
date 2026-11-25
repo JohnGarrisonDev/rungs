@@ -232,3 +232,12 @@
 .portrait .hud, .portrait .panel { align-self: stretch; }
 .portrait .panel { padding-inline: 0.3em; }
 .portrait .kb-row { gap: 0.24em; }
+
+/* ---- talk.js widget at the bottom of the result card (kit/talk.js, styles in kit/shell.css) */
+.sheet .talk { align-self: stretch; text-align: center; }
+.sheet .talk-row { justify-content: center; }
+.sheet .talk-daily { gap: 6px; margin-top: 0.2em; padding-top: 10px; }
+.sheet .talk-daily.compact .talk-choice { padding: 6px 9px; }
+/* The vote adds height: if the routes cannot shrink any further, let the card scroll rather than clip. */
+.sheet { overflow-y: auto; }
+.sheet .talk-daily .talk-row { gap: 6px; }
