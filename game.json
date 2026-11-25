@@ -4,13 +4,22 @@
   "tagline": "One letter per rung. Climb from one word to another.",
   "description": "A word ladder with an odd little robot on it. Change one letter at a time, every step a real word, and climb from the bottom word to the top one in as few rungs as you can. Three fresh ladders every day with streaks, a 60-ladder Journey and endless practice.",
   "genre": "Word puzzle",
-  "kinds": ["Word", "Puzzle"],
+  "kinds": [
+    "Word",
+    "Puzzle"
+  ],
   "daily": true,
+  "difficulty": 2,
+  "difficultyNote": "You can always reach the top. Matching par on the tall ladders takes a good vocabulary.",
   "verb": "Climb",
   "tone": "pink",
   "players": "1 player",
   "session": "2–10 min ladders",
-  "controls": ["Keyboard", "Mouse", "Touch"],
+  "controls": [
+    "Keyboard",
+    "Mouse",
+    "Touch"
+  ],
   "version": "1.0.0",
   "released": "2026-11-24",
   "updated": "2026-11-24",
