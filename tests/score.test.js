@@ -64,9 +64,9 @@ test('streaks: consecutive days add up, a gap resets, the same day counts once',
 
 test('share text is short, ends with the URL and never reveals a word', () => {
   const sum = [e(2, 3, 0, 3), e(2, 7, 1, 6), e(2, 8, 0, 8)]
-  assert.equal(shareText('2026-11-24', sum), 'Rungs 2026-11-24 · Short 3/3 · Tall 7/6 · Towering 8/8 💡1\ngames.oddvale.com/rungs')
-  assert.equal(shareText('2026-11-24', [e(2, 3, 0, 3), e(3, 2, 0, 6), e(0, 0, 0, 8)]), 'Rungs 2026-11-24 · Short 3/3 · Tall 👀/6 · Towering –/8\ngames.oddvale.com/rungs')
-  assert.ok(shareText('2026-11-24', null).endsWith('games.oddvale.com/rungs'))
+  assert.equal(shareText('2026-11-24', sum), 'Rungs 2026-11-24 · Short 3/3 · Tall 7/6 · Towering 8/8 💡1\nhttps://games.oddvale.com/rungs/')
+  assert.equal(shareText('2026-11-24', [e(2, 3, 0, 3), e(3, 2, 0, 6), e(0, 0, 0, 8)]), 'Rungs 2026-11-24 · Short 3/3 · Tall 👀/6 · Towering –/8\nhttps://games.oddvale.com/rungs/')
+  assert.ok(shareText('2026-11-24', null).endsWith('\nhttps://games.oddvale.com/rungs/'))
   const words = shareText('2026-11-24', sum).toLowerCase().split(/[^a-z]+/)
   for (const l of dailyLadders('2026-11-24')) for (const w of l.route) assert.ok(!words.includes(w), w)
 })

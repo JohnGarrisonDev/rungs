@@ -20,6 +20,8 @@ export function createScene(canvas) {
     len: 4, words: [], goal: '', par: 3, over: false, won: false,
     G: 3, gAnim: 3,          // goal rung index (and its animated value while the ladder grows)
     cam: 0,                  // rung index sitting at the bottom of the view
+    look: 0, held: false,    // rungs the player has scrolled down to look back (0 = follow the climb); held = dragging
+    mark: -1,                // a climbed rung waiting for a second tap to climb down to it
     robot: 0, hopFrom: 0, hopTo: 0, hopT: 1,
     preview: null,           // { letters: ['c','o',...] ('' = empty), changed: [bool] }
     bell: -1, wiggle: -1, no: -1, cheer: -1, flash: -1,
@@ -56,7 +58,7 @@ export function createScene(canvas) {
       const n = words.length - 1
       V.G = won ? n : Math.max(par, n + 1); V.gAnim = V.G
       V.robot = V.hopFrom = V.hopTo = n; V.hopT = 1
-      V.cam = camTarget(V.G, n, geom().rows)
+      V.cam = camTarget(V.G, n, geom().rows); V.look = 0; V.held = false; V.mark = -1
       V.preview = null; V.bell = V.wiggle = V.no = V.cheer = V.flash = -1
       for (const p of V.parts) p.on = false
     },
@@ -68,7 +70,34 @@ export function createScene(canvas) {
       V.hopFrom = V.robot; V.hopTo = n; V.hopT = V.reduced ? 1 : 0
       if (V.reduced) { V.robot = n; V.gAnim = V.G }
       if (n > from) V.flash = 0
+      V.look = 0; V.mark = -1
     },
+    /** Look back down the ladder (1.3): positive = further down. `px` is a drag or wheel distance in CSS pixels.
+     *  Returns how many rungs below the climb the view now sits. */
+    scrollBy(px) {
+      if (V.mode !== 'play') return 0
+      const G = geom(), max = camTarget(V.G, V.words.length - 1, G.rows)
+      V.look = clamp(V.look + px / G.S, 0, max)
+      return V.look
+    },
+    hold(on) { V.held = !!on },
+    /** The climbed rung (0 = start word) under canvas point x, y, not counting the rung the robot is on; or -1. */
+    rungAt(x, y) {
+      if (V.mode !== 'play' || V.won || V.over) return -1
+      const G = geom(), n = V.words.length - 1
+      const k = Math.round(V.cam + (G.baseY - (y + G.T * 0.6)) / G.S)
+      if (k < 0 || k >= n || x < G.railL - G.T * 0.3 || x > G.railR + G.T * 0.3) return -1
+      const goalNat = G.baseY - (V.gAnim - V.cam) * G.S
+      if (goalNat < G.topY - 0.5 && G.baseY - (k - V.cam) * G.S < G.topY + G.S * 0.72) return -1 // hidden under the pinned goal
+      return k
+    },
+    /** Mark a rung (a pulsing outline) while it waits for a second tap; -1 clears. */
+    mark(k) { V.mark = k },
+    lookHome() { V.look = 0 },
+    /** Rungs scrolled back (0 when following the climb). */
+    looking: () => V.look,
+    /** Rungs hidden below the view while following the climb (0 = the start word is on screen). */
+    hiddenBelow: () => (V.mode === 'play' ? camTarget(V.G, V.words.length - 1, geom().rows) : 0),
     setOver(over) { V.over = over },
     setPreview(p) { V.preview = p },
     shakeNo() { V.no = 0 },
@@ -108,9 +137,11 @@ export function createScene(canvas) {
     const k = 1 - Math.exp(-dt * 9)
     V.gAnim += (V.G - V.gAnim) * k
     if (Math.abs(V.G - V.gAnim) < 0.002) V.gAnim = V.G
-    const ct = camTarget(V.G, V.words.length - 1, G.rows)
+    const follow = camTarget(V.G, V.words.length - 1, G.rows)
+    if (V.look > follow) V.look = follow
+    const ct = follow - V.look
     V.cam += (ct - V.cam) * (1 - Math.exp(-dt * 6))
-    if (Math.abs(ct - V.cam) < 0.002 || V.reduced) V.cam = ct
+    if (Math.abs(ct - V.cam) < 0.002 || V.reduced || V.held) V.cam = ct
     for (const key of ['bell', 'wiggle', 'no', 'cheer', 'flash']) if (V[key] >= 0) V[key] += dt
     if (V.wiggle > 1.4) V.wiggle = -1
     if (V.no > 0.4) V.no = -1
@@ -321,6 +352,12 @@ export function createScene(canvas) {
       g.save(); g.translate(G.cx, y); g.scale(1 + pop, 1 + pop); g.translate(-G.cx, -y)
       word(G, y, tiltOf(k), w, (i) => (w[i] === V.goal[i] ? 'match' : 'plain'))
       g.restore()
+      if (k === V.mark) {
+        const pad = G.T * 0.28, a = V.reduced ? 1 : 0.65 + 0.35 * Math.sin(V.t * 8)
+        g.save(); g.globalAlpha = a; g.strokeStyle = C.blue; g.lineWidth = 3; g.setLineDash([G.T * 0.22, G.T * 0.14])
+        rr(G.cx - G.rowW / 2 - pad, y - G.T * 1.1 - pad, G.rowW + pad * 2, G.T + pad * 2, G.T * 0.3); g.stroke()
+        g.restore()
+      }
     }
     // the goal rung, with the bell post
     {
@@ -348,7 +385,7 @@ export function createScene(canvas) {
       const jump = V.cheer >= 0 && !V.reduced ? Math.abs(Math.sin(V.cheer * 6.5)) * G.T * 0.22 * Math.exp(-V.cheer * 0.9) : 0
       const idle = V.reduced ? 0 : Math.sin(V.t * 2.2) * G.T * 0.012
       const shake = V.no >= 0 ? Math.sin(V.no * 46) * G.T * 0.09 * (1 - V.no / 0.4) : 0
-      robot(G.robotX + sway(ry), ry - G.T * 0.085 - hop * G.S * 0.2 - jump + idle, G.T, {
+      if (V.won || V.look < 0.01 || ry >= limit) robot(G.robotX + sway(ry), ry - G.T * 0.085 - hop * G.S * 0.2 - jump + idle, G.T, {
         squash: V.hopT < 1 ? Math.cos(V.hopT * Math.PI * 2) * 0.5 : 0, cheer, shake,
         blink: !V.reduced && (V.t % 3.7) < 0.12, lookY: V.no >= 0 ? 0.2 : -0.8, look: V.no >= 0 ? -0.9 : -0.45,
       })

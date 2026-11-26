@@ -38,6 +38,14 @@ test('bad fields are clamped or dropped one by one', () => {
   assert.equal(s.last, null)
 })
 
+test('an Endless ladder keeps its word version: missing (1.2 saves) stays missing, 2 stays 2', () => {
+  const snap = { rungs: [], hints: 0, hintAt: -1, revealed: false }
+  const cur = { seed: 9, len: 4, height: 'mid', snap, done: false }
+  assert.equal(sanitize({ endless: { cur } }).endless.cur.w, undefined)
+  assert.equal(sanitize({ endless: { cur: { ...cur, w: 2 } } }).endless.cur.w, 2)
+  assert.equal(sanitize({ endless: { cur: { ...cur, w: 7 } } }).endless.cur.w, undefined)
+})
+
 test('cleanSnap', () => {
   assert.equal(cleanSnap(null), null)
   assert.equal(cleanSnap({ rungs: new Array(500).fill('cold') }), null)

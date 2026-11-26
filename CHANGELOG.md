@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0 — 2026-11-26
+
+- Look back down a tall ladder: drag it (or use the mouse wheel), or tap the Start chip to jump to the bottom and Back up to return.
+- Took a wrong turn? Tap an old rung, then tap it again, and the robot climbs straight back down to it.
+- From 28 November, ladders skip a few bookish or British-only words (VALE, LORRY, ELOPE...), and the robot's route avoids plurals like BOARS when an equally short way exists. Hints prefer the same way. Earlier ladders, including the archive, are exactly as they were.
+- New Endless ladders use the same tidier words. A ladder you already started carries on unchanged.
+- Copy result never leaves you stuck: if your browser blocks copying, the result pops up over the game, selected, ready to copy by hand. The shared result now ends with the full link, https://games.oddvale.com/rungs/.
+- On a phone held sideways in full screen, the result card and Result / Next ladder buttons are full-size (44px) taps.
+- On a 360px phone the keyboard no longer pokes past the right edge on five-letter ladders, and the keys are a touch wider.
+
 ## 1.2.0 — 2026-11-26
 
 - Plays better on phones: full screen on every phone, iPhone included, with a "Play full screen" button under the game.

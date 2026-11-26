@@ -93,7 +93,7 @@ export function createUI(root, actions) {
       </div>
       <button class="iconbtn giveup" data-act="giveup" data-f="p-giveup" aria-label="Give up and see the robot's route" title="Give up">${ICON.flag}</button>
     </div>
-    <div class="slot" data-slot="play"></div>
+    <div class="slot" data-slot="play" data-f="p-slot"><button class="lookbtn" data-act="look" data-f="p-look" hidden></button></div>
     <div class="panel" data-f="p-panel">
       <p class="msg" data-f="p-msg" aria-live="polite"></p>
       <div class="entry">

@@ -67,5 +67,5 @@ export function shareText(key, sum) {
     const n = e.st === ST.done ? String(e.n) : e.st === ST.revealed ? '👀' : '–'
     return `${k.name} ${n}/${e.p || '?'}`
   })
-  return `Rungs ${key} · ${parts.join(' · ')}${hints ? ` 💡${hints}` : ''}\ngames.oddvale.com/rungs`
+  return `Rungs ${key} · ${parts.join(' · ')}${hints ? ` 💡${hints}` : ''}\nhttps://games.oddvale.com/rungs/`
 }

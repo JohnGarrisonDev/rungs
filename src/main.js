@@ -141,7 +141,7 @@ function paintEndless() {
 // ---------------------------------------------------------------- play
 function begin(mode, ladder, snap, meta) {
   const session = S.restore(ladder, snap) || S.newSession(ladder)
-  app.play = { mode, session, ladder, meta, typed: '', slot: -1, hintPos: -1, resultIn: 0, armed: 0, note: null, fresh: null }
+  app.play = { mode, session, ladder, meta, typed: '', slot: -1, hintPos: -1, resultIn: 0, armed: 0, note: null, fresh: null, downTo: -1, markFresh: false }
   save.last = mode === 'daily' ? { mode, date: meta.date, idx: meta.idx } : { mode }
   persist()
   go('play')
@@ -166,8 +166,8 @@ function startJourney(i, resume = true) {
 }
 function startEndless(fresh) {
   const e = save.endless
-  if (fresh || !e.cur) e.cur = { seed: ((Date.now() % 2147483647) ^ Math.floor(Math.random() * 4294967296)) >>> 0, len: e.len, height: e.height, snap: { rungs: [], hints: 0, hintAt: -1, revealed: false }, done: false }
-  begin('endless', endlessLadder(e.cur.seed, e.cur.len, e.cur.height), e.cur.snap, {})
+  if (fresh || !e.cur) e.cur = { seed: ((Date.now() % 2147483647) ^ Math.floor(Math.random() * 4294967296)) >>> 0, len: e.len, height: e.height, snap: { rungs: [], hints: 0, hintAt: -1, revealed: false }, done: false, w: 2 }
+  begin('endless', endlessLadder(e.cur.seed, e.cur.len, e.cur.height, e.cur.w || 1), e.cur.snap, {})
 }
 
 function defaultMsg() {
@@ -182,6 +182,9 @@ function paintPlay(shake = false) {
   const p = app.play
   if (!p) return
   const s = p.session, l = p.ladder, over = S.isOver(s), cur = S.current(s)
+  // a rung marked for "climb down" stays marked only until the player does something else
+  if (p.downTo >= 0 && !p.markFresh) { p.downTo = -1; scene.mark(-1) }
+  p.markFresh = false
   if (p.mode === 'daily') { ui.text('p-mode', p.meta.date === app.today ? 'Daily' : `Daily · ${prettyDate(p.meta.date)}`); ui.text('p-name', DAILY_KINDS[p.meta.idx].name) }
   else if (p.mode === 'journey') { ui.text('p-mode', CHAPTERS[JOURNEY[p.meta.level].chapter].name); ui.text('p-name', `Ladder ${p.meta.level + 1}`) }
   else { ui.text('p-mode', 'Endless'); ui.text('p-name', `${l.len} letters`) }
@@ -340,11 +343,29 @@ function copyResult(el) {
     let ok = false
     try { ok = document.execCommand('copy') } catch { ok = false }
     ta.remove()
-    if (ok) done(); else ui.toast('Could not copy')
+    if (ok) done(); else showShareText(text)
   }
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback)
   else fallback()
   return text
+}
+/** 1.3: when the browser refuses both ways of copying, show the result over the game, selected, to copy by hand. */
+function showShareText(text) {
+  let pop = uiRoot.querySelector('.sharepop')
+  if (!pop) {
+    pop = document.createElement('div')
+    pop.className = 'sharepop'
+    pop.setAttribute('role', 'dialog')
+    pop.setAttribute('aria-label', 'Your result, to copy')
+    pop.innerHTML = '<p>Your browser would not let us copy. Select the text and copy it yourself:</p><textarea class="sharebox" readonly rows="3" aria-label="Your result"></textarea><button class="btn small" type="button">Done</button>'
+    pop.querySelector('button').addEventListener('click', () => { pop.hidden = true })
+    uiRoot.appendChild(pop)
+  }
+  pop.hidden = false
+  const box = pop.querySelector('textarea')
+  box.value = text
+  box.focus({ preventScroll: true })
+  box.select()
 }
 
 const playing = () => app.screen === 'play' && app.play && !S.isOver(app.play.session)
@@ -377,6 +398,7 @@ const actions = {
     if (!playing()) return
     const p = app.play, k = d.k, cur = S.current(p.session)
     p.note = null
+    scene.lookHome() // typing brings the view back up to the rung being built
     if (p.slot >= 0) {
       if (k === cur[p.slot]) { note(`That letter is already ${up(k)}.`, 'bad'); snd.del(); return paintPlay(true) }
       submit(cur.slice(0, p.slot) + k + cur.slice(p.slot + 1))
@@ -410,7 +432,14 @@ const actions = {
     p.typed = ''
     p.slot = p.slot === i ? -1 : i
     p.note = p.slot >= 0 ? { text: 'Now tap the new letter.', tone: 'go' } : null
+    scene.lookHome()
     snd.pick(); paintPlay()
+  },
+  /** The chip on the ladder: jump down to the start word, or back up to the climb. */
+  look() {
+    if (app.screen !== 'play' || !app.play) return
+    snd.click()
+    if (scene.looking() > 0.3) scene.lookHome(); else scene.scrollBy(1e6)
   },
   move(d) {
     if (!playing()) return
@@ -520,8 +549,70 @@ stage.addEventListener('oddvale:fullscreen', layout)
 stage.addEventListener('contextmenu', (e) => { if (e.target.closest('.ui, canvas')) e.preventDefault() })
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout)
 
+// Look back down a tall ladder (1.3): drag the ladder (finger up = see lower rungs) or use the wheel.
+{
+  const el = ui.f['p-slot']
+  let drag = null
+  el.addEventListener('pointerdown', (e) => {
+    if (drag || app.screen !== 'play' || !app.play || e.button > 0 || e.target.closest('button')) return
+    e.preventDefault()
+    drag = { id: e.pointerId, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false }
+    try { el.setPointerCapture(e.pointerId) } catch { /* synthetic events */ }
+    scene.hold(true); el.classList.add('dragging')
+  })
+  el.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return
+    if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 8) return
+    drag.moved = true
+    scene.scrollBy(drag.y - e.clientY)
+    drag.y = e.clientY
+  })
+  const end = (e) => {
+    if (!drag || e.pointerId !== drag.id) return
+    const d = drag
+    drag = null; scene.hold(false); el.classList.remove('dragging')
+    if (e.type === 'pointerup' && !d.moved) tapLadder(e.clientX, e.clientY)
+  }
+  for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(t, end)
+  el.addEventListener('wheel', (e) => {
+    if (app.screen !== 'play' || !app.play || scene.hiddenBelow() < 0.5) return
+    e.preventDefault()
+    scene.scrollBy(e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? 400 : 1))
+  }, { passive: false })
+}
+/** Tap an old rung to climb back down to it (1.3): the first tap marks it, a second tap on it climbs down. */
+function tapLadder(x, y) {
+  if (!playing()) return
+  const p = app.play, r = canvas.getBoundingClientRect(), k = scene.rungAt(x - r.left, y - r.top)
+  if (k < 0) { if (p.downTo >= 0) { p.note = null; paintPlay() } return }
+  const word = k === 0 ? p.ladder.start : p.session.rungs[k - 1]
+  if (p.downTo === k) {
+    S.undoTo(p.session, k)
+    p.typed = ''; p.slot = -1; p.hintPos = -1; p.note = null; p.armed = 0
+    scene.setWords([p.ladder.start, ...p.session.rungs])
+    snd.down(p.session.rungs.length); haptic(10); savePlay(); paintPlay()
+    return
+  }
+  p.downTo = k; p.markFresh = true; scene.mark(k)
+  note(`Tap ${up(word)} again to climb back down to it.`, 'go')
+  snd.pick(); paintPlay()
+}
+let lookState = ''
+function paintLook() {
+  const below = app.screen === 'play' && app.play ? scene.hiddenBelow() : 0
+  const st = below >= 0.5 ? (scene.looking() > 0.3 ? 'up' : 'down') : ''
+  if (st === lookState) return
+  lookState = st
+  const b = ui.f['p-look']
+  b.hidden = !st
+  b.classList.toggle('up', st === 'up')
+  b.innerHTML = st === 'up' ? '<b aria-hidden="true">↑</b> Back up' : '<b aria-hidden="true">↓</b> Start'
+  b.setAttribute('aria-label', st === 'up' ? 'Back up to the rung you are on' : 'Look back down the ladder to the start word')
+}
+
 function tick(dt) {
   scene.update(dt)
+  paintLook()
   const p = app.play
   if (p && p.resultIn > 0) { p.resultIn -= dt; if (p.resultIn <= 0) { p.resultIn = 0; if (app.screen === 'play') openResult(true) } }
   scene.draw()

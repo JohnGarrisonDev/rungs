@@ -6,7 +6,7 @@
 //              finished or revealed], cur: { level, snap } | null },
 //   daily:   { days: { 'YYYY-MM-DD': { sum: [{ st, n, h, p } x3], snaps: [snap | null x3] } },
 //              streak, best, last },                 (see score.js for `sum`, creditDay for the streak fields)
-//   endless: { len, height, solved, cur: { seed, len, height, snap, done } | null },
+//   endless: { len, height, solved, cur: { seed, len, height, snap, done, w? } | null },  (w: 2 = 1.3 words; missing = 1.0)
 //   last:    { mode: 'journey' | 'daily' | 'endless', date?, idx? } | null   (what was on screen, for resume)
 // }
 // `snap` is a session snapshot (session.js): { rungs: [words], hints, hintAt, revealed }. It is replayed through
@@ -73,6 +73,7 @@ export function sanitize(raw) {
     const ec = obj(e.cur), es = cleanSnap(ec.snap)
     if (Number.isFinite(ec.seed) && [3, 4, 5].includes(ec.len) && HEIGHT_IDS.includes(ec.height) && es) {
       out.endless.cur = { seed: ec.seed >>> 0, len: ec.len, height: ec.height, snap: es, done: !!ec.done }
+      if (ec.w === 2) out.endless.cur.w = 2 // word version (1.3); missing = version 1, so older ladders resume unchanged
     }
 
     const l = obj(r.last)

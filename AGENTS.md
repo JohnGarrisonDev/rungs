@@ -12,6 +12,7 @@ Rungs is an Oddvale Games title. Read the hub's `GAME_GUIDE.md` first (no build 
 - `kit/talk.js` (hub kit, do not edit) adds the anonymous player-input widgets: `dailyTalk` fills `r-talk` at the bottom of the result card for **today's** daily ladders only (boards `short`/`tall`/`towering`, score = rungs used, lower is better; a revealed ladder votes without a score), and `tellUs` fills `#tell-us` in the info section. Both stay hidden when the studio API is unreachable.
 - `main.js` adds `.portrait` to the stage when it is taller than wide and sets the `.ui` font-size from the stage size. All sizes in `game.css` are in `em`. Portrait play is a column (HUD, ladder, panel with entry row + keyboard). Landscape play is two columns (HUD, rules card and keyboard on the left, the ladder full height on the right).
 - The stage is always light "print on paper", also in dark mode: brand tokens are pinned inside `.ui`.
+- Looking back (1.3): the play `.slot` takes pointer events. A vertical drag calls `scene.scrollBy(px)` (`V.look` = rungs below the followed camera, clamped; `hold()` makes the camera follow the finger without easing), the wheel does the same, and the `.lookbtn` chip (`look` action, painted from `tick` by `paintLook`) jumps to the start word or back up. Typing, picking a tile and every new rung reset the view. A tap without a drag goes to `tapLadder`: `scene.rungAt(x, y)` finds the climbed rung, the first tap marks it (`scene.mark`, a pulsing blue outline, `p.downTo`) and a second tap calls `S.undoTo`. Any other action clears the mark (`paintPlay`, unless `p.markFresh`).
 - Phones (1.2): `layout()` measures against the canvas (in full screen the kit insets the canvas by the safe areas, and `.ui` carries the kit's `stage-inset` class to match). `.short` on the stage = landscape under 520px tall (a phone on its side): no rules card, tighter HUD and keyboard, text at 13px or more, a two-column result card (routes capped with container units), scrolling menus. Tiles and keys have invisible `::before` hit margins. In portrait full screen the HUD row is full, so `game.css` moves the kit's exit button just under it (`:has(.play:not([hidden]))`). `haptic()` on a rung, a refused word and the bell.
 
 ## The rules, precisely
@@ -40,7 +41,9 @@ Rungs is an Oddvale Games title. Read the hub's `GAME_GUIDE.md` first (no build 
 
 Everything that feeds this is part of the daily's identity: the order and number of `rng()` calls in `generate.js`, the puzzle word list (and its sorted order), the order of `PAIRS`, the Journey list (it is excluded from the themed pool), `isEndpoint`, and the neighbour order in `graph.js`. Change any of them and every player's daily changes, mid-day, with in-progress saves pointing at ladders that no longer exist (they are dropped safely, but it is rude).
 
-`tests/daily.test.js` pins five dates with `ladderHash`. **If that test fails, you changed the dailies. Do not paste new hashes in to make it pass.** If you need new words or a better generator, add a new code path chosen by date (for example `if (dateKey >= '2027-06-01') return dailyLaddersV2(dateKey)`) with its own frozen copy of the lists, and leave the old path exactly as it is. Appending to `pair-candidates.txt` is NOT safe either: it changes the themed pool size.
+**Word version 2 (1.3).** `dailyLadders` sends dates from `WORDS_V2` ('2026-11-28') to `dailyLadders2` (seed `'rungs:v2:' + date`): endpoints from `endpointList2` (no `RETIRED` bookish words), par through `isPuzzle2` (puzzle words minus `RETIRED`), the route from `nicestPath(..., isInflected)` (a shortest path with the fewest plurals/past forms), and `makeLadder2` retries a pair whose route still needs two of them. Version 1 (dates up to 2026-11-27, the Journey via `ladderFromPair`) is untouched. `tests/daily.test.js` freezes every daily from 2026-11-10 to 2026-11-27 (`PUBLISHED`). Endless saves the version with the ladder (`endless.cur.w`: 2, missing = version 1) because it is rebuilt from its seed. Hints (`nextStep`) prefer the version 2 way when it is just as short. To retire more words, add a version 3 dated after the latest published day; never edit `RETIRED`.
+
+`tests/daily.test.js` pins five dates with `ladderHash` (the ones from 2026-11-28 on moved once, in 1.3, before they were published). **If that test fails, you changed the dailies. Do not paste new hashes in to make it pass.** If you need new words or a better generator, add a new code path chosen by date (for example `if (dateKey >= '2027-06-01') return dailyLaddersV2(dateKey)`) with its own frozen copy of the lists, and leave the old path exactly as it is. Appending to `pair-candidates.txt` is NOT safe either: it changes the themed pool size.
 
 Dates are local calendar days (`dateKey()`), generated with integer maths only.
 
@@ -65,26 +68,27 @@ Serve the folder (see README) and open `/?debug`. `window.__game` has `state()`,
 - Themed 5-letter pairs are scarce (about 30 fit the Towering band), hence the lower themed share for Towering.
 - Scenery is tied to height: ground and trees at the bottom, clouds from rung 3, dusk around 7, stars and a moon from about 9. A par-8 ladder ends at dusk; you only see deep night on a long detour or the last Journey chapter. That is deliberate (a small reward for tall climbs).
 - The goal rung sits at `max(par, rungs + 1)`: empty dashed rungs up to it show how much room par leaves; go over par and the ladder grows. When the goal is above the view it is pinned at the top with three dots under it.
-- Phone key width at 360px is about 29px by 51px tall. Do not add an eleventh key to a row.
+- Phone keys at 360x640 in the page: 28px wide, 47px tall (34 x 56 in full screen; 33 x 55 at 390x844). Before 1.3 the five-letter entry row was 3px wider than the 360px stage and pushed the keyboard's last key past the edge; 1.3 trims gaps and lets portrait tiles go to 35px. Ten keys in a 302px row cannot reach 44px wide; the `::before` margins make the whole row touch target. Do not add an eleventh key to a row.
 - Sound: one pentatonic step per rung (`snd.rung(k)`), a two-knock wooden "nope", a three-strike bell.
 
 ## Known weak spots
 
+- Copy result (1.3): when both `navigator.clipboard` and `execCommand('copy')` fail, `showShareText` in `main.js` puts a `.sharepop` (selected read-only text and a Done button) over the game inside `.ui`. Checked by stubbing both to fail; a real copy on a phone is unconfirmed. The share text ends with `https://games.oddvale.com/rungs/`.
+
 - Phone landscape: the kit sizes the stage from viewport height, so the stage is small unless the player goes full screen (full screen uses the `.short` layout).
 - Not checked on a real phone: native full screen (the dev browser pane never settles `requestFullscreen`; the kit falls back to focus mode), iPhone Safari, real multi-touch.
-- A few puzzle words are still a little bookish (ELOPE, RILE, SNUB). Fixing that means versioning the daily generator (see above).
+- Bookish words: version 2 retired 52 (one AI's judgement, not a player survey) from dailies from 2026-11-28 and new Endless ladders. The Journey, 3-letter ladders, dailies up to 2026-11-27 and Endless ladders saved before 1.3 still use them. Routes with a plural: version 1 had 13 in 333 dailies (2026-11-10 to 2027-02-28); version 2 has 8 in a year of dailies (1,095 ladders, at most one plural each, where no equally short way avoids it), and no retired word on any route.
+- Scroll back and tap-to-climb-down were checked with mouse drags and synthetic pointer events in the dev browser, not with a real finger; the drag could fight a page scroll gesture on some phones (`touch-action: none` on the slot should prevent that).
 - The robot's route is one shortest path; ties break by letter position then alphabet, so the shown route is sometimes not the most "natural" of several equal ones.
 - Hints on the guess list (after a detour into rare words) can suggest a rare word.
 - The canvas redraws every frame even when idle. Fine so far; an idle throttle would save battery.
-- The ladder cannot be scrolled by hand; past rungs slide off the bottom and are only listed on the result card.
 - No colour-blind toggle beyond the built-in non-colour cues (underline on matched letters, dashed outlines).
 
 ## Ideas backlog
 
 - "Greased rung" ladders (one letter position locked for the whole climb) and "Detour" ladders (must pass through a marked middle word) as a 7th Journey chapter or a daily bonus. Both are a filter on the graph search: restrict `has` or chain two shortest paths.
-- Drag to scroll the ladder; tap an old rung to undo back to it.
 - A share image: the ladder silhouette with blank tiles, coloured by matches.
-- Six-letter ladders for Endless (needs a new curated list; the graph is very sparse).
+- Six-letter ladders for Endless (needs a new curated list and the 6-letter ENABLE words, which are not in `guess.js`; the graph is very sparse). Not done in 1.3: no word lists may be downloaded, and a hand-made list would need checking.
 - Per-ladder "best" on Journey buttons and a "perfect chapter" badge.
 - A definition peek for rare words the player enters (would need bundled data; no network).
 - Weekly "tower": seven dailies stacked, total rungs vs par.

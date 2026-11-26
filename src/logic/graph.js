@@ -71,6 +71,35 @@ export function shortestPath(a, b, has) {
   return path
 }
 
+/** A shortest path [a, ..., b] that steps on as few `dull(word)` words as possible (1.3: plurals on the robot's route).
+ *  Same length as shortestPath; among equally dull paths, ties break by neighbour order. Null when there is no way. */
+export function nicestPath(a, b, has, dull) {
+  if (a === b) return [a]
+  if (a.length !== b.length) return null
+  const dist = distancesFrom(b, (w) => w === a || has(w), a)
+  if (!dist.has(a)) return null
+  const memo = new Map([[b, 0]])
+  const cost = (w) => {
+    if (memo.has(w)) return memo.get(w)
+    const d = dist.get(w)
+    let best = Infinity
+    for (const n of neighbors(w, (x) => dist.get(x) === d - 1)) best = Math.min(best, cost(n))
+    const c = best + (dull(w) ? 1 : 0)
+    memo.set(w, c)
+    return c
+  }
+  const path = [a]
+  let cur = a
+  while (cur !== b) {
+    const d = dist.get(cur)
+    let pick = null, pc = Infinity
+    for (const n of neighbors(cur, (x) => dist.get(x) === d - 1)) { const c = cost(n); if (c < pc) { pc = c; pick = n } }
+    if (!pick) return null
+    path.push(pick); cur = pick
+  }
+  return path
+}
+
 /** The words of the biggest connected group in `list`. */
 export function mainComponent(list, has) {
   const seen = new Set()

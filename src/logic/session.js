@@ -1,8 +1,8 @@
 // One ladder in play. Pure: no DOM, no clock.
 // A session is { ladder, rungs, hints, hintAt, revealed }: `rungs` are the words the player has added above the
 // start word, in order. The climb is finished when the newest rung is the goal word.
-import { diffCount, shortestPath, distance } from './graph.js'
-import { isGuess, isPuzzle, isHintable } from './words.js'
+import { diffCount, shortestPath, nicestPath, distance } from './graph.js'
+import { isGuess, isPuzzle, isPuzzle2, isInflected, isHintable } from './words.js'
 
 export const MAX_RUNGS = 60
 
@@ -54,6 +54,9 @@ export function undo(s) {
 /** The next word of a shortest way up from `from`, preferring puzzle words, never showing a blocked word.
  *  -> { word, left } (left = steps still to go after taking it) or null when there is no way from here. */
 export function nextStep(from, goal) {
+  // 1.3: prefer a way just as short that skips retired bookish words and plurals
+  const nice = nicestPath(from, goal, isPuzzle2, isInflected), plain = shortestPath(from, goal, isPuzzle)
+  if (nice && plain && nice.length === plain.length && nice.length > 1) return { word: nice[1], left: nice.length - 2 }
   for (const has of [isPuzzle, isHintable]) {
     const path = shortestPath(from, goal, has)
     if (path && path.length > 1) return { word: path[1], left: path.length - 2 }
@@ -68,6 +71,15 @@ export function hint(s) {
   if (!step) return null
   if (s.hintAt !== s.rungs.length) { s.hints++; s.hintAt = s.rungs.length }
   return step
+}
+
+/** Climb back down to rung k (0 = the start word) in one go (1.3: tap an old rung). Returns rungs removed. */
+export function undoTo(s, k) {
+  if (isOver(s) || !Number.isInteger(k) || k < 0 || k >= s.rungs.length) return 0
+  const n = s.rungs.length - k
+  s.rungs.length = k
+  s.hintAt = -1
+  return n
 }
 
 /** Give up: the robot shows its route. */

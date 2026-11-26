@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { newSession, current, isDone, isOver, check, move, undo, hint, nextStep, reveal, stepsLeft, snapshot, restore, REASONS, MAX_RUNGS } from '../src/logic/session.js'
+import { newSession, current, isDone, isOver, check, move, undo, undoTo, hint, nextStep, reveal, stepsLeft, snapshot, restore, REASONS, MAX_RUNGS } from '../src/logic/session.js'
 import { ladderFromPair, dailyLadders } from '../src/logic/generate.js'
 import { distance } from '../src/logic/graph.js'
 import { isPuzzle, isGuess, isHintable } from '../src/logic/words.js'
@@ -50,6 +50,19 @@ test('undo steps down one rung and stops at the bottom', () => {
   assert.ok(undo(s)); assert.equal(current(s), 'cold')
   assert.equal(undo(s), false)
   assert.ok(move(s, 'cord').ok, 'an undone word can be used again')
+})
+
+test('undoTo climbs back down to an old rung in one go', () => {
+  const s = newSession(ladderFromPair('cold', 'warm'))
+  for (const w of ['cord', 'card', 'ward']) assert.ok(move(s, w).ok)
+  assert.equal(undoTo(s, 3), 0, 'the rung you are on is not "back"')
+  assert.equal(undoTo(s, 1), 2)
+  assert.equal(current(s), 'cord')
+  assert.equal(undoTo(s, 0), 1)
+  assert.equal(current(s), 'cold')
+  assert.equal(undoTo(s, -1), 0)
+  for (const w of ['cord', 'card', 'ward', 'warm']) move(s, w)
+  assert.equal(undoTo(s, 1), 0, 'a finished ladder stays finished')
 })
 
 test('the ladder has a height limit', () => {

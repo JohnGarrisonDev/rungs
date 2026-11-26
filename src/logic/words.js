@@ -28,3 +28,19 @@ export function isEndpoint(w) {
 }
 export const endpointList = {}
 for (const n of LENGTHS) endpointList[n] = puzzleList[n].filter(isEndpoint)
+
+// ---- 1.3 word version (dailies from WORDS_V2 in generate.js, new Endless ladders, hints)
+/** Bookish, old-fashioned or British-only puzzle words. Still accepted when typed, but from version 2 on they are
+ *  never a start, goal or robot's-route word. Never edit this set: add a new version instead (see AGENTS.md). */
+export const RETIRED = new Set(('dame deem dote flak glen hale hark hind jape lass lest mart mere moot quay ream rend rife rook ' +
+  'sire teem vale yule rile canny crone elope endow fiver flout forgo frock glean golly guise hovel knoll laden leant liken ' +
+  'lithe lorry mealy mould rouse scald shoal smock stave steed waked wooly').split(' '))
+export const isPuzzle2 = (w) => puzzleSet.has(w) && !RETIRED.has(w)
+/** A plural or past form of a shorter puzzle word (CATS, BOARS, BAKED): fine to type, dull on the robot's route. */
+export function isInflected(w) {
+  if (w.length < 4) return false
+  if (w[w.length - 1] === 's' && w[w.length - 2] !== 's' && puzzleSet.has(w.slice(0, -1))) return true
+  return w.length === 5 && w.endsWith('ed') && puzzleSet.has(w.slice(0, 4))
+}
+export const endpointList2 = {}
+for (const n of LENGTHS) endpointList2[n] = endpointList[n].filter((w) => !RETIRED.has(w))
