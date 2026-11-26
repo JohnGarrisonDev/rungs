@@ -8,6 +8,13 @@
   <link rel="canonical" href="https://games.oddvale.com/rungs/" />
   <meta name="theme-color" content="#17131f" />
   <link rel="icon" href="kit/favicon.svg" type="image/svg+xml" />
+  <!-- "Add to Home Screen" opens the whole arcade like an app (no browser bars), from any game page. -->
+  <link rel="manifest" href="../site.webmanifest" />
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Oddvale Games" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Oddvale Games" />
   <meta property="og:title" content="Rungs — Oddvale Games" />
@@ -49,7 +56,7 @@
       <!-- All game UI (menus, HUD, game over) lives inside the stage so it works in full screen. -->
       <div class="stage" id="stage">
         <canvas id="game" aria-label="Rungs: a word ladder with an odd little robot climbing it."></canvas>
-        <div class="ui" id="ui"></div>
+        <div class="ui stage-inset" id="ui"></div>
       </div>
       <section class="info">
         <div class="card tilt-l"><h2>How to play</h2><ul>
@@ -64,7 +71,7 @@
           <li><b>Quick way:</b> tap a letter of the next rung, then tap the key to swap in. One letter changed, done.</li>
           <li><b>Or type</b> the whole word and press <kbd>Enter</kbd>. <kbd>Backspace</kbd> deletes.</li>
           <li><kbd>←</kbd> <kbd>→</kbd> pick a letter to change · <kbd>↓</kbd> undo (climb down) · <kbd>?</kbd> hint · <kbd>Esc</kbd> back</li>
-          <li>The on-screen keyboard works with mouse and touch, so phones never need their own keyboard.</li>
+          <li>The on-screen keyboard works with mouse and touch, so phones never need their own keyboard. The buttons beside the next rung undo and hint; the flag gives up. On a phone, <b>Play full screen</b> gives the ladder the whole screen, upright or sideways.</li>
         </ul></div>
         <div class="card tilt-r"><h2>Made by AI, in the open</h2><p>This game was designed and coded by AI models, and AI models keep updating it. The whole thing is on <a href="https://github.com/JohnGarrisonDev/rungs">GitHub</a>: read the code, see what changed, or suggest what comes next.</p></div>
         <div class="card" id="tell-us" hidden></div>
@@ -74,7 +81,7 @@
 
   <footer class="footer">
     <div class="wrap">
-      <span>Rungs v1.1.0 · An <a href="https://oddvale.com">Oddvale</a> game. Your progress is saved in this browser only. Word list: ENABLE (public domain).</span>
+      <span>Rungs v1.2.0 · An <a href="https://oddvale.com">Oddvale</a> game. Your progress is saved in this browser only. Word list: ENABLE (public domain).</span>
       <span><a href="../">More games</a> · <a href="https://github.com/JohnGarrisonDev/rungs/issues/new?template=feedback.yml" target="_blank" rel="noopener">Feedback</a> · <a href="../privacy/">Privacy</a> · <a href="https://github.com/JohnGarrisonDev/rungs">Source</a></span>
     </div>
   </footer>

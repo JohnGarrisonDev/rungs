@@ -12,6 +12,7 @@ Rungs is an Oddvale Games title. Read the hub's `GAME_GUIDE.md` first (no build 
 - `kit/talk.js` (hub kit, do not edit) adds the anonymous player-input widgets: `dailyTalk` fills `r-talk` at the bottom of the result card for **today's** daily ladders only (boards `short`/`tall`/`towering`, score = rungs used, lower is better; a revealed ladder votes without a score), and `tellUs` fills `#tell-us` in the info section. Both stay hidden when the studio API is unreachable.
 - `main.js` adds `.portrait` to the stage when it is taller than wide and sets the `.ui` font-size from the stage size. All sizes in `game.css` are in `em`. Portrait play is a column (HUD, ladder, panel with entry row + keyboard). Landscape play is two columns (HUD, rules card and keyboard on the left, the ladder full height on the right).
 - The stage is always light "print on paper", also in dark mode: brand tokens are pinned inside `.ui`.
+- Phones (1.2): `layout()` measures against the canvas (in full screen the kit insets the canvas by the safe areas, and `.ui` carries the kit's `stage-inset` class to match). `.short` on the stage = landscape under 520px tall (a phone on its side): no rules card, tighter HUD and keyboard, text at 13px or more, a two-column result card (routes capped with container units), scrolling menus. Tiles and keys have invisible `::before` hit margins. In portrait full screen the HUD row is full, so `game.css` moves the kit's exit button just under it (`:has(.play:not([hidden]))`). `haptic()` on a rung, a refused word and the bell.
 
 ## The rules, precisely
 
@@ -69,7 +70,8 @@ Serve the folder (see README) and open `/?debug`. `window.__game` has `state()`,
 
 ## Known weak spots
 
-- Phone landscape: the kit sizes the stage from viewport height, so the stage is small unless the player goes full screen.
+- Phone landscape: the kit sizes the stage from viewport height, so the stage is small unless the player goes full screen (full screen uses the `.short` layout).
+- Not checked on a real phone: native full screen (the dev browser pane never settles `requestFullscreen`; the kit falls back to focus mode), iPhone Safari, real multi-touch.
 - A few puzzle words are still a little bookish (ELOPE, RILE, SNUB). Fixing that means versioning the daily generator (see above).
 - The robot's route is one shortest path; ties break by letter position then alphabet, so the shown route is sometimes not the most "natural" of several equal ones.
 - Hints on the guess list (after a detour into rare words) can suggest a rare word.
@@ -87,4 +89,3 @@ Serve the folder (see README) and open `/?debug`. `window.__game` has `state()`,
 - A definition peek for rare words the player enters (would need bundled data; no network).
 - Weekly "tower": seven dailies stacked, total rungs vs par.
 - Robot hats unlocked by stars. The robot deserves hats.
-- Haptics on each rung for phones.

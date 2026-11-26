@@ -241,3 +241,44 @@
 /* The vote adds height: if the routes cannot shrink any further, let the card scroll rather than clip. */
 .sheet { overflow-y: auto; }
 .sheet .talk-daily .talk-row { gap: 6px; }
+
+/* ---- phones and full screen (1.2) */
+.iconbtn { min-width: 44px; min-height: 44px; }
+/* Letter tiles and keys answer on pointerdown: give them an invisible margin so a near miss still lands on the
+   nearest one, and there is no dead gap between neighbours. */
+.tile::before { content: ""; position: absolute; inset: -0.4em -0.2em; }
+.key { position: relative; }
+.key::before { content: ""; position: absolute; inset: -0.18em -0.16em; }
+.ui .btn:active, .dcard:active { filter: brightness(0.96); }
+@media (pointer: coarse) {
+  .ui .btn, .ui .btn.small, .ui .day { min-height: 44px; }
+  .sheet .talk-daily.compact .talk-choice { min-height: 44px; }
+}
+/* Full screen: .ui is a kit .stage-inset (clear of notches and the home bar); keep the top-right corner free for the
+   kit's exit button. */
+.stage.is-full .bar { padding-right: 50px; }
+.stage.is-full .stage-exit { top: max(8px, env(safe-area-inset-top, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); }
+/* Portrait: the HUD row is full (back, name, chips, give up), so the exit button sits just under it, over the sky. */
+.stage.is-full.portrait:has(.play:not([hidden])) .stage-exit { top: calc(env(safe-area-inset-top, 0px) + 72px); }
+/* Short landscape (a phone on its side): the rules card goes (it is on the page too), the HUD and keyboard tighten,
+   so the whole keyboard fits a 390px-tall screen beside a full-height ladder. */
+.short .play { grid-template-columns: minmax(0, 27em) minmax(0, 1fr); grid-template-rows: auto 0 minmax(0, 1fr) auto; gap: 0.4em 1em; padding: 0.5em 0.8em 0.6em; }
+.short .legend { display: none; }
+.short .hud { padding: 0.3em 0.55em; transform: none; box-shadow: 3px 3px 0 var(--edge); }
+.short .panel { padding: 0.4em 0.55em 0.5em; gap: 0.35em; box-shadow: 3px 3px 0 var(--edge); }
+.short .kb { gap: 0.28em; }
+.short .kb-row { gap: 0.24em; }
+.short .key { height: 2.75em; min-height: 40px; }
+.short .modal { padding: 0.5em; }
+/* The result card sideways: the climb (routes) gets its own column on the right. */
+.short .sheet { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1.3em; row-gap: 0.35em; align-items: start; justify-items: center; align-content: start; max-width: 44em; padding: 0.8em 1.1em 0.9em; }
+.short .sheet > * { grid-column: 1; }
+.short .modal { container-type: size; }
+.short .sheet > .routes { grid-column: 2; grid-row: 1 / span 9; min-height: 0; max-height: calc(100cqh - 2.8em); margin-block: 0; }
+.short .sheet h3 { font-size: 2.1em; }
+.short .sheet .row { margin-top: 0.2em; }
+.short .menu { gap: 0.5em; padding: 0.6em 1.2em 0.7em; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.short .pager-name { min-height: 0; }
+.short .dlist { gap: 0.45em; }
+.short .dcard { padding: 0.45em 0.9em; }
+.bar .total { min-width: 0; text-align: right; }

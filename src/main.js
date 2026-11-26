@@ -1,6 +1,6 @@
 // Rungs: app state, screen flow, input, saving, frame loop and the ?debug hook.
 // Rules live in src/logic (pure, tested). ui.js builds the DOM, scene.js draws the canvas; neither holds game state.
-import { makeStore, wireChrome } from '../kit/kit.js'
+import { makeStore, wireChrome, haptic } from '../kit/kit.js'
 import { dailyTalk, tellUs } from '../kit/talk.js'
 import { createUI, starsHtml, esc } from './ui.js'
 import { createScene } from './scene.js'
@@ -237,14 +237,14 @@ function submit(word) {
   if (!res.ok) {
     p.typed = ''
     note(S.REASONS[res.reason] + (res.reason === 'notword' ? `: ${up(word)}` : '') + '.', 'bad')
-    snd.nope(); scene.shakeNo()
+    snd.nope(); scene.shakeNo(); haptic([20, 40, 20])
     paintPlay(true)
     return res
   }
   p.typed = ''; p.slot = -1; p.hintPos = -1; p.note = null; p.armed = 0
   scene.setWords([p.ladder.start, ...s.rungs], { won: res.done })
   if (res.done) finish()
-  else { snd.rung(s.rungs.length); savePlay() }
+  else { snd.rung(s.rungs.length); haptic(10); savePlay() }
   paintPlay()
   return res
 }
@@ -271,7 +271,7 @@ function finish() {
   }
   scene.setOver(true)
   scene.celebrate()
-  snd.rung(n); snd.bell(true)
+  snd.rung(n); snd.bell(true); haptic([18, 60, 30])
   p.resultIn = reduced.matches ? 0.5 : 1.5
 }
 
@@ -477,6 +477,7 @@ window.addEventListener('keydown', (e) => {
   const onButton = e.target instanceof HTMLElement && e.target.closest('button, a')
   if (e.ctrlKey) { if (e.key.toLowerCase() === 'z' && playing()) { e.preventDefault(); actions.undo() } return }
   if (e.key === 'Escape') {
+    if (document.documentElement.classList.contains('stage-focus')) return // the kit leaves full screen
     if (app.screen === 'play') { if (!ui.f.result.hidden) ui.f.result.hidden = true; else if (app.play && (app.play.slot >= 0 || app.play.typed)) { app.play.slot = -1; app.play.typed = ''; app.play.note = null; paintPlay() } else actions.back() }
     else if (app.screen !== 'title') actions.title()
     return
@@ -494,12 +495,15 @@ window.addEventListener('keydown', (e) => {
 
 // ---------------------------------------------------------------- layout + loop
 function layout() {
-  const r = stage.getBoundingClientRect()
+  const r = canvas.getBoundingClientRect() // the stage minus any safe-area inset in full screen (the .ui matches it)
   const w = r.width, h = r.height
   if (!w || !h) return
   app.portrait = w < h * 0.95
   stage.classList.toggle('portrait', app.portrait)
-  const fs = app.portrait ? Math.min(w / 23, h / 40) : Math.min(w / 62, h / 38)
+  // A phone on its side (short landscape): no rules card, a compact column, text at 13px or more.
+  const short = !app.portrait && h < 520
+  stage.classList.toggle('short', short)
+  const fs = app.portrait ? Math.min(w / 23, h / 40) : short ? Math.min(w / 56, h / 29) : Math.min(w / 62, h / 38)
   uiRoot.style.fontSize = `${Math.max(11, Math.min(18, fs)).toFixed(2)}px`
   scene.resize()
   const slotEl = ui.slot(app.screen)
@@ -511,6 +515,9 @@ const ro = new ResizeObserver(layout)
 ro.observe(stage)
 for (const k in ui.slots) ro.observe(ui.slots[k])
 document.addEventListener('fullscreenchange', layout)
+stage.addEventListener('oddvale:fullscreen', layout)
+// No long-press menu on the keyboard, tiles or ladder.
+stage.addEventListener('contextmenu', (e) => { if (e.target.closest('.ui, canvas')) e.preventDefault() })
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout)
 
 function tick(dt) {

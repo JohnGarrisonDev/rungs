@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-11-26
+
+- Plays better on phones: full screen on every phone, iPhone included, with a "Play full screen" button under the game.
+- A phone held sideways gets its own layout: the whole keyboard fits beside a full-height ladder, and the result card puts your climb in its own column.
+- Letter tiles and keys catch near misses, buttons are bigger on touch screens, and there is no long-press menu on the keyboard.
+- A gentle buzz on each new rung, a double buzz for a word that does not fit, and a bigger one when you ring the bell (Android, with sound on).
+
 ## 1.1.0 — 2026-11-25
 
 - After each of today's ladders, tell us how hard it was with one tap, and see how your rungs compare with everyone else's today. Anonymous: nothing about you is stored.
